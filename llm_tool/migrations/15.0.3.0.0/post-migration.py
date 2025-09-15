@@ -6,15 +6,15 @@ _logger = logging.getLogger(__name__)
 
 def migrate(cr, version):
     """
-    Migration script to convert existing tool messages directly to body_json format.
+    Migration script to convert existing tool messages directly to body_json format for Odoo 15.
 
     This migration handles both:
     1. Old format: separate fields (tool_call_id, tool_call_definition, tool_call_result)
     2. Intermediate format: JSON in body field
 
-    All tool data is consolidated into the body_json field.
+    All tool data is consolidated into the body_json field as JSON string.
     """
-    _logger.info("Starting migration to convert tool messages to body_json format")
+    _logger.info("Starting migration to convert tool messages to body_json format for Odoo 15")
 
     # First, handle messages with the old separate fields format
     cr.execute("""
@@ -83,7 +83,7 @@ def migrate(cr, version):
                 # No result means it's still executing or failed without result
                 tool_data["status"] = "executing"
 
-            # Store directly in body_json field and clear body
+            # Store as JSON string in body_json field and clear body
             cr.execute(
                 """
                 UPDATE mail_message
@@ -149,7 +149,7 @@ def migrate(cr, version):
                 _logger.debug(f"Skipping message {msg_id}: body is not valid JSON")
                 continue
 
-            # Move JSON data to body_json field and clear body
+            # Move JSON data to body_json field as string and clear body
             cr.execute(
                 """
                 UPDATE mail_message

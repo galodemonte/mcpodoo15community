@@ -15,9 +15,17 @@ class MailMessage(models.Model):
     def get_tool_calls(self):
         """Get tool calls from assistant message body_json."""
         self.ensure_one()
-        if self.llm_role != "assistant" or not self.body_json:
+        if self.llm_role != "assistant":
             return []
-        return self.body_json.get("tool_calls", [])
+        
+        if not self.body_json:
+            return []
+            
+        try:
+            body_data = json.loads(self.body_json) if isinstance(self.body_json, str) else self.body_json
+            return body_data.get("tool_calls", [])
+        except (json.JSONDecodeError, TypeError):
+            return []
 
     def has_tool_calls(self):
         """Check if assistant message has tool calls."""
@@ -63,7 +71,7 @@ class MailMessage(models.Model):
         if thread_model:
             return thread_model.message_post(
                 body=f"Executing {tool_name}",
-                body_json=tool_data,
+                body_json=json.dumps(tool_data),
                 llm_role="tool",
                 author_id=False,
             )
@@ -73,7 +81,7 @@ class MailMessage(models.Model):
                 {
                     "model": self.model,
                     "res_id": self.res_id,
-                    "body_json": tool_data,
+                    "body_json": json.dumps(tool_data),
                     "subtype_xmlid": "llm.mt_tool",
                     "author_id": False,
                     "body": f"Executing {tool_name}",
@@ -129,7 +137,7 @@ class MailMessage(models.Model):
 
         # Update status to executing
         tool_data["status"] = "executing"
-        self.write({"body_json": tool_data})
+        self.write({"body_json": json.dumps(tool_data)})
         yield {"type": "message_update", "message": self.message_format()[0]}
 
         # Execute tool and update message
@@ -142,7 +150,7 @@ class MailMessage(models.Model):
                 # Update tool data with result
                 tool_data["status"] = "completed"
                 tool_data["result"] = result
-                self.write({"body_json": tool_data})
+                self.write({"body_json": json.dumps(tool_data)})
 
                 # Emit tool_succeeded event
                 yield {
@@ -161,7 +169,7 @@ class MailMessage(models.Model):
             # Update tool data with error
             tool_data["status"] = "error"
             tool_data["error"] = str(e)
-            self.write({"body_json": tool_data})
+            self.write({"body_json": json.dumps(tool_data)})
             
             # Emit tool_failed event
             yield {
@@ -281,14 +289,14 @@ class MailMessage(models.Model):
 
         if thread_model:
             return thread_model.message_post(
-                body_json=tool_data, llm_role="tool", author_id=False
+                body_json=json.dumps(tool_data), llm_role="tool", author_id=False
             )
         else:
             return self.env["mail.message"].create(
                 {
                     "model": self.model,
                     "res_id": self.res_id,
-                    "body_json": tool_data,
+                    "body_json": json.dumps(tool_data),
                     "subtype_xmlid": "llm.mt_tool",
                     "author_id": False,
                 }
@@ -302,7 +310,10 @@ class MailMessage(models.Model):
         """
         self.ensure_one()
         if self.llm_role == "tool" and self.body_json:
-            return self.body_json
+            try:
+                return json.loads(self.body_json) if isinstance(self.body_json, str) else self.body_json
+            except (json.JSONDecodeError, TypeError):
+                return None
         return None
 
     def is_tool_message_with_status(self, status):

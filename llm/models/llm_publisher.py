@@ -11,7 +11,7 @@ class LLMPublisher(models.Model):
         max_width=1024, max_height=1024, verify_resolution=True, help="Publisher logo"
     )
     description = fields.Text(tracking=True)
-    meta = fields.Json(string="Publisher Metadata")
+    meta = fields.Text(string="Publisher Metadata")
     official = fields.Boolean(
         default=False,
         tracking=True,

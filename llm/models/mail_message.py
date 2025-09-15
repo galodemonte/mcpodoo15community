@@ -21,7 +21,7 @@ class MailMessage(models.Model):
         help="The LLM role for this message (user, assistant, tool, system)",
     )
 
-    body_json = fields.Json(
+    body_json = fields.Text(
         string="JSON Body",
         help="JSON data for tool messages and other structured content",
     )

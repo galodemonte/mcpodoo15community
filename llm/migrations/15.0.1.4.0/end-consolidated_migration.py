@@ -7,13 +7,13 @@ _logger = logging.getLogger(__name__)
 
 def migrate(cr, version):
     """
-    Simple and efficient LLM migration:
+    Simple and efficient LLM migration for Odoo 15:
     Migrate messages from old subtypes to new subtypes using direct batch updates.
     The llm_role field will auto-compute based on the new subtype_id.
     """
     env = api.Environment(cr, SUPERUSER_ID, {})
 
-    _logger.info("Starting LLM migration...")
+    _logger.info("Starting LLM migration for Odoo 15...")
 
     # Migrate messages from old subtypes to new subtypes
     migrations = [

@@ -1,3 +1,11 @@
+15.0.3.0.0 (2025-01-15)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* [PORT] Ported module from Odoo 16 to Odoo 15
+* [IMP] Adapted Json fields to Text fields for Odoo 15 compatibility
+* [IMP] Updated body_json handling to work with Text field storage
+* [IMP] Maintained all functionality while ensuring Odoo 15 compatibility
+
 16.0.3.0.0 (2025-07-04)
 ~~~~~~~~~~~~~~~~~~~~~~~
 

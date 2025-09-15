@@ -25,8 +25,8 @@ class LLMModel(models.Model):
     active = fields.Boolean(default=True)
 
     # Model details
-    details = fields.Json()
-    model_info = fields.Json()
+    details = fields.Text()
+    model_info = fields.Text()
     parameters = fields.Text()
     template = fields.Text()
 
